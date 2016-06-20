@@ -1,29 +1,44 @@
-int m;
-int n;
+int m=5;
+int n=4;
 
-int add()
-{
-  return m+n;
-}
+int func1();
 
-int sub()
-{
-  return m-n;
-}
-
-int mul()
-{
-  return m*n;
-}
+int func2();
 
 int main()
 {
   int res1;
   int res2;
-  int res3;
-  res1 = add();
-  res2 = mul();
-  res3 = sub();
-
+  res1 = func1();
+  res2 = func2();
   return 0;
+}
+
+int func1()
+{
+  int res;
+  for(int i=0; i<m; i++)
+  {
+    for(int j=0; j<n; j++)
+    {
+      res += i+j;
+    }
+  }
+  return res;
+}
+
+int func2()
+{
+  int res;
+  for(int i=0; i<m; i++)
+  {
+    for(int j=0; j<n; j++)
+    {
+      for(int k=i+j; k>0; k--)
+      {
+        res *= k;
+      }
+    }
+  }
+  return res;
 }

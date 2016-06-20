@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <iostream>
 #define V 100
 using namespace llvm;
 
@@ -48,7 +49,7 @@ namespace
     //wrapper funciton
     int findSCC(BBgraph graph, Function &F);
     //helper funtion
-    int SCC(const BasicBlock* u, int disc[], int low[], std::stack<int> *st, bool stackMember[], BBgraph graph);
+    void SCC(const BasicBlock* u, int disc[], int low[], std::stack<int> *st, bool stackMember[], BBgraph graph, int* time, int* total);
 
   };
 }
@@ -59,11 +60,14 @@ static RegisterPass<CountSCCPass> Y("conncomp", "Print SCCs of each function CFG
 int CountSCCPass::findSCC(BBgraph graph, Function &F)
 {
   //wrapper funtion
-  unsigned total = 0;
+  int ptotal = 0;
+  int* total = &ptotal;
   int *disc = new int[V];
   int *low = new int[V];
   bool *stackMember = new bool[V];
   std::stack<int> *st = new std::stack<int>();
+  int ptime = 0;
+  int* time = &ptime;
  
   // Initialize disc and low, and stackMember arrays
   for (int i = 0; i < V; i++)
@@ -80,10 +84,9 @@ int CountSCCPass::findSCC(BBgraph graph, Function &F)
     //assign numbers to the basic blocks within a function
     unsigned temp=0;
     if (disc[graph[&*bb]] == -1)
-       temp = SCC(&*bb, disc, low, st, stackMember, graph);
-    total += temp;
+       SCC(&*bb, disc, low, st, stackMember, graph, time, total);
   }
-  return total;
+  return ptotal;
 }
 
 // u --> The vertex to be visited next
@@ -94,16 +97,13 @@ int CountSCCPass::findSCC(BBgraph graph, Function &F)
 // *st -- >> To store all the connected ancestors
 // stackMember[] --> bool array for faster check whethera node is in stack
 
-int CountSCCPass::SCC(const BasicBlock* u, int disc[], int low[], std::stack<int> *st, bool stackMember[], BBgraph graph)
+void CountSCCPass::SCC(const BasicBlock* u, int disc[], int low[], std::stack<int> *st, bool stackMember[], BBgraph graph, int* time, int* total)
 {
-    // A static variable is used for keeping track
-    static int time = 0;
- 
     // Initialize discovery time and low value
-    disc[graph[u]] = low[graph[u]] = ++time;
+    disc[graph[u]] = low[graph[u]] = ++(*time);
     st->push(graph[u]);
     stackMember[graph[u]] = true;
-    
+
     // Go through all basic block which are successor to the current one
     const TerminatorInst *TInst = u->getTerminator();
     for (unsigned c = 0, NSucc = TInst->getNumSuccessors(); c < NSucc; ++c)
@@ -112,7 +112,7 @@ int CountSCCPass::SCC(const BasicBlock* u, int disc[], int low[], std::stack<int
         // If v is not visited yet, then recur for it
         if (disc[graph[v]] == -1)
         {
-            SCC(v, disc, low, st, stackMember, graph);
+            SCC(v, disc, low, st, stackMember, graph, time, total);
              // Case 1 (per above discussion on Disc and Low value)
             low[graph[u]]=low[graph[u]]<low[graph[v]]?low[graph[u]]:low[graph[v]];
         }
@@ -124,22 +124,20 @@ int CountSCCPass::SCC(const BasicBlock* u, int disc[], int low[], std::stack<int
     }
     
     // head node found, pop the stack
-    unsigned count=0;
     int w = 0;  // To store stack extracted vertices
     //if low and disc time is same then it is a head
     if (low[graph[u]] == disc[graph[u]])
     {
+        //std::cout << graph[u] <<std::endl;
+        (*total)++;
         while (st->top() != graph[u])
         {
             w = (int) st->top();
             stackMember[w] = false;
             st->pop();
-            count++;
         }
         w = (int) st->top();
         stackMember[w] = false;
         st->pop();
-        count++;
     }    
-    return count;
 }
