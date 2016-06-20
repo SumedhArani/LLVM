@@ -29,16 +29,24 @@ int func1()
 
 int func2()
 {
-  int res;
+  int res1;
+  int res2;
   for(int i=0; i<m; i++)
   {
     for(int j=0; j<n; j++)
     {
       for(int k=i+j; k>0; k--)
       {
-        res *= k;
+        res1 *= k;
       }
     }
   }
-  return res;
+  for(int i=0; i<m; i++)
+  {
+    for(int j=0; j<n; j++)
+    {
+      res2 += i+j;
+    }
+  }
+  return res1+res2;
 }
