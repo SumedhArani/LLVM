@@ -27,7 +27,6 @@ namespace
     CountSCCPass() : FunctionPass(ID) {}
     typedef DenseMap<const BasicBlock *, int> BBgraph;
 
-
     bool runOnFunction(Function &F) 
     {
       unsigned i =0;
@@ -129,15 +128,19 @@ void CountSCCPass::SCC(const BasicBlock* u, int disc[], int low[], std::stack<in
     if (low[graph[u]] == disc[graph[u]])
     {
         //std::cout << graph[u] <<std::endl;
-        (*total)++;
+        unsigned count = 0;
         while (st->top() != graph[u])
         {
             w = (int) st->top();
             stackMember[w] = false;
             st->pop();
+            count++;
         }
         w = (int) st->top();
         stackMember[w] = false;
         st->pop();
+        count++;
+        if(count>1)
+          (*total)++;
     }    
 }
