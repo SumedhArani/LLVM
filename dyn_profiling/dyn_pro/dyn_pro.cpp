@@ -57,8 +57,7 @@ namespace
       LLVMContext &c = M->getContext();
       Constant* printFunc = F.getParent()->getOrInsertFunction("print", Type::getVoidTy(c), Type::getInt32Ty(c), NULL);
 
-      Type *intTy = TypeBuilder<int,false>::get(c);
-      Value *p = M->getOrInsertGlobal("abc",intTy);
+      Value *p = M->getNamedGlobal("abc");
 
       while(BB_ptr!=BB_end)
       {
