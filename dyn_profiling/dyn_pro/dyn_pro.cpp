@@ -80,9 +80,10 @@ namespace
           {
             LoadInst *Load = builder.CreateLoad(g);
             Value *Inc = builder.CreateAdd(builder.getInt32(1), Load);
-            StoreInst *Store = builder.CreateStore(Inc, p);
+            //Gives ERROR ----------
+            //StoreInst *Store = builder.CreateStore(Inc, p);
             Value* args[] = {Inc};
-            builder.CreateCall(printFunc,args);
+            //builder.CreateCall(printFunc,args);
           }
           // Insert a call to our function.
           depth =1;
