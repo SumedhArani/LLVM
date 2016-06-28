@@ -4,9 +4,9 @@ cd ../build
 make
 cd ../test_cases
 clang -c -emit-llvm input.c -o input.bc
-opt -load ../build/dyn_pro/libDynProfilePass.so -disable-output input.bc
-clang -Xclang -load -Xclang ../build/dyn_pro/libDynProfilePass.so -c input.c
+opt -load ../build/dyn_pro/libDynProfilePass.so -dp -disable-output input.bc
+opt -load ../build/dyn_pro/libDynProfilePass.so -dp input.bc -S > out.ll
 clang -S -emit-llvm input.c -o input.ll
-gcc -c rtlib.c
-gcc input.o rtlib.o
+llc out.ll
+gcc out.s
 ./a.out
