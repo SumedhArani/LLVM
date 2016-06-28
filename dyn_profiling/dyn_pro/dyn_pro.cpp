@@ -89,31 +89,53 @@ namespace
             unsigned depth = 0;
             while(LI.getLoopDepth(&*BB_ptr)!=1 and BB_ptr!=BB_end)
             {
+              //Resets the count for inner and outer loops
               Instruction* op_reset = &*(BB_ptr->begin());
               IRBuilder<> builder(op_reset);
               builder.SetInsertPoint(&*BB_ptr, BB_ptr->begin());
-              if (GlobalVariable* g_reset = dyn_cast<GlobalVariable>(p))
+              if (GlobalVariable* g_reset_a = dyn_cast<GlobalVariable>(p))
               {
-                LoadInst *Load_reset = builder.CreateLoad(g_reset);
+                LoadInst *Load_reset = builder.CreateLoad(g_reset_a);
                 Value *Inc_reset = builder.CreateAdd(builder.getInt32(1), builder.getInt32(0));
-                StoreInst *Store = builder.CreateStore(Inc_reset, g_reset);
+                StoreInst *Store = builder.CreateStore(Inc_reset, g_reset_a);
               }
+              if (GlobalVariable* g_reset_b = dyn_cast<GlobalVariable>(q))
+              {
+                LoadInst *Load_reset = builder.CreateLoad(g_reset_b);
+                Value *Inc_reset = builder.CreateAdd(builder.getInt32(1), builder.getInt32(0));
+                StoreInst *Store = builder.CreateStore(Inc_reset, g_reset_b);
+              }
+
+              //Inserts a new line
+              std::vector<llvm::Type *> args;
+              args.push_back(llvm::Type::getInt8PtrTy(c));
+              llvm::FunctionType *printfType =
+                  llvm::FunctionType::get(builder.getInt32Ty(), args, true);
+              llvm::Constant *printfFunc =
+                  M->getOrInsertFunction("printf", printfType);
+              std::vector<llvm::Value *> values;
+              llvm::Value *formatStr = builder.CreateGlobalStringPtr("\n");
+              values.clear();
+              values.push_back(formatStr);
+              builder.CreateCall(printfFunc, values);
               ++BB_ptr;
             }
 
             if(LI.getLoopDepth(&*BB_ptr)==1)
             {
-              //Insert counter
-              ++BB_ptr;
+              //Inserts counter
+              ++BB_ptr; //Body of the for loop
               Instruction* op = &*(BB_ptr->begin());
               IRBuilder<> builder(op);
               builder.SetInsertPoint(&*BB_ptr, BB_ptr->begin());
               if (GlobalVariable* g = dyn_cast<GlobalVariable>(p))
               {
+                //Increment the global variable
                 LoadInst *Load = builder.CreateLoad(g);
                 Value *Inc = builder.CreateAdd(builder.getInt32(1), Load);
                 StoreInst *Store = builder.CreateStore(Inc, p);
 
+                //Print the value
                 std::vector<llvm::Type *> args;
                 args.push_back(llvm::Type::getInt8PtrTy(c));
                 llvm::FunctionType *printfType =
@@ -122,11 +144,11 @@ namespace
                     M->getOrInsertFunction("printf", printfType);
                 std::vector<llvm::Value *> values;
                 llvm::Value *formatStr = builder.CreateGlobalStringPtr("Value outer = %d\n");
+                values.clear();
                 values.push_back(formatStr);
                 values.push_back(Load);
                 builder.CreateCall(printfFunc, values);
               }
-              // Insert a call to our function.
               depth =1;
             }
 
@@ -136,10 +158,9 @@ namespace
               {
                 ++BB_ptr;
               }
-
               if(LI.getLoopDepth(&*BB_ptr)>depth)
               {
-                //Insert counter
+                //Inserts counter
                 ++BB_ptr;
                 Instruction* op = &*(BB_ptr->begin());
                 IRBuilder<> builder(op);
@@ -159,15 +180,14 @@ namespace
                       M->getOrInsertFunction("printf", printfType);
                   std::vector<llvm::Value *> values;
                   llvm::Value *formatStr = builder.CreateGlobalStringPtr("value nested = %d\n");
+                  values.clear();
                   values.push_back(formatStr);
                   values.push_back(Load_b);
                   builder.CreateCall(printfFunc, values);
                 }
-
                 depth = LI.getLoopDepth(&*BB_ptr);
                 ++BB_ptr;
               }
-
               else
               {
                 ++BB_ptr;
