@@ -7,7 +7,9 @@ Implemented basic passes for-</br>
 5.Finding the hot fields in a struct for a given program</br>
 6.Profiling on loops by adding IR code to the source code and running the code at run time.</br>
 with the use of LLVM framework.
-</br></italic>
+</br>
+</br>
+</italic>
 Shell scripts have been written to execute a set of commands to obtain the neccesary results!
 You can find the shell script in /test_cases folder.
 </br>
